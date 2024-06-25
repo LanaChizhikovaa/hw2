@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Менеджер Паролей</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f0f0f0;
+        }
+        h1 {
+            text-align: center;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+        }
+        form input {
+            margin-bottom: 10px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        form button {
+            padding: 10px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        form button:hover {
+            background-color: #45a049;
+        }
+        .password-list {
+            margin-top: 20px;
+        }
+        .password-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+        }
+        .password-item span {
+            word-break: break-all;
+        }
+        .password-item button {
+            background-color: #f44336;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .password-item button:hover {
+            background-color: #e53935;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Менеджер Паролей</h1>
+        <form id="password-form">
+            <input type="text" id="login" placeholder="Логин" required>
+            <input type="password" id="password" placeholder="Пароль" required>
+            <input type="url" id="url" placeholder="URL" required>
+            <button type="submit">Добавить</button>
+        </form>
+        <div class="password-list" id="password-list"></div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.getElementById('password-form');
+            const passwordList = document.getElementById('password-list');
+
+            function savePasswords(passwords) {
+                localStorage.setItem('passwords', JSON.stringify(passwords));
+            }
+
+            function loadPasswords() {
+                const passwords = localStorage.getItem('passwords');
+                return passwords ? JSON.parse(passwords) : [];
+            }
+
+            function renderPasswords() {
+                const passwords = loadPasswords();
+                passwordList.innerHTML = '';
+                passwords.forEach((password, index) => {
+                    const passwordItem = document.createElement('div');
+                    passwordItem.className = 'password-item';
+                    passwordItem.innerHTML = `
+                        <span><strong>Логин:</strong> ${password.login}</span>
+                        <span><strong>Пароль:</strong> ${password.password}</span>
+                        <span><strong>URL:</strong> <a href="${password.url}" target="_blank">${password.url}</a></span>
+                        <button data-index="${index}">Удалить</button>
+                    `;
+                    passwordList.appendChild(passwordItem);
+                });
+            }
+
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                const login = document.getElementById('login').value;
+                const password = document.getElementById('password').value;
+                const url = document.getElementById('url').value;
+                const passwords = loadPasswords();
+                passwords.push({ login, password, url });
+                savePasswords(passwords);
+                renderPasswords();
+                form.reset();
+            });
+
+            passwordList.addEventListener('click', (e) => {
+                if (e.target.tagName === 'BUTTON') {
+                    const index = e.target.getAttribute('data-index');
+                    const passwords = loadPasswords();
+                    passwords.splice(index, 1);
+                    savePasswords(passwords);
+                    renderPasswords();
+                }
+            });
+
+            renderPasswords();
+        });
+    </script>
+</body>
+</html>
